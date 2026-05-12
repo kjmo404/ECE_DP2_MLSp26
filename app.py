@@ -6,6 +6,36 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 # -----------------------------------
+# DATA DEFAULTS
+# -----------------------------------
+try:
+    _df = pd.read_csv("stress.csv")
+    DEFAULT_FEATURE_MEANS = _df.drop(columns=["stress_level"]).mean().to_dict()
+except Exception:
+    DEFAULT_FEATURE_MEANS = {
+        "anxiety_level": 11.0636,
+        "self_esteem": 17.7773,
+        "mental_health_history": 0.4927,
+        "depression": 12.5555,
+        "headache": 2.5082,
+        "blood_pressure": 2.1818,
+        "sleep_quality": 2.66,
+        "breathing_problem": 2.7536,
+        "noise_level": 2.6491,
+        "living_conditions": 2.5182,
+        "safety": 2.7373,
+        "basic_needs": 2.7727,
+        "academic_performance": 2.7727,
+        "study_load": 2.6218,
+        "teacher_student_relationship": 2.6482,
+        "future_career_concerns": 2.6491,
+        "social_support": 1.8818,
+        "peer_pressure": 2.7345,
+        "extracurricular_activities": 2.7673,
+        "bullying": 2.6173,
+    }
+
+# -----------------------------------
 # PAGE CONFIG
 # -----------------------------------
 
@@ -24,7 +54,6 @@ lasso_model = joblib.load("models/lasso.pkl")
 kmeans = joblib.load("models/kmeans.pkl")
 pca = joblib.load("models/pca.pkl")
 scaler = joblib.load("models/scaler.pkl")
-
 # -----------------------------------
 # SIDEBAR
 # -----------------------------------
@@ -121,16 +150,32 @@ if page == "Survey":
 
     # CREATE DATAFRAME
 
-    user_df = pd.DataFrame({
-        "sleep_quality": [sleep_quality],
-        "study_load": [study_load],
-        "extracurricular_activities": [extracurricular_activities],
-        "social_support": [social_support],
-        "anxiety_level": [anxiety_level],
-        "depression": [depression],
-        "future_career_concerns": [future_career_concerns],
-        "academic_performance": [academic_performance]
-    })
+    full_input = {
+        "anxiety_level": anxiety_level,
+        "self_esteem": DEFAULT_FEATURE_MEANS["self_esteem"],
+        "mental_health_history": DEFAULT_FEATURE_MEANS["mental_health_history"],
+        "depression": depression,
+        "headache": DEFAULT_FEATURE_MEANS["headache"],
+        "blood_pressure": DEFAULT_FEATURE_MEANS["blood_pressure"],
+        "sleep_quality": sleep_quality,
+        "breathing_problem": DEFAULT_FEATURE_MEANS["breathing_problem"],
+        "noise_level": DEFAULT_FEATURE_MEANS["noise_level"],
+        "living_conditions": DEFAULT_FEATURE_MEANS["living_conditions"],
+        "safety": DEFAULT_FEATURE_MEANS["safety"],
+        "basic_needs": DEFAULT_FEATURE_MEANS["basic_needs"],
+        "academic_performance": academic_performance,
+        "study_load": study_load,
+        "teacher_student_relationship": DEFAULT_FEATURE_MEANS["teacher_student_relationship"],
+        "future_career_concerns": future_career_concerns,
+        "social_support": social_support,
+        "peer_pressure": DEFAULT_FEATURE_MEANS["peer_pressure"],
+        "extracurricular_activities": extracurricular_activities,
+        "bullying": DEFAULT_FEATURE_MEANS["bullying"],
+    }
+
+    user_df = pd.DataFrame([full_input])
+
+    st.info("Some predictor values are filled with dataset averages so the model can generate a complete stress profile.")
 
     # ANALYZE BUTTON
 
